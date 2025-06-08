@@ -8,9 +8,11 @@ const db = require("../config/database");
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log("Login attempt for:", username);
 
     // Get user from database
     const [users] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
+    console.log("Users found:", users.length);
 
     if (users.length === 0) {
       return res.status(401).json({
@@ -20,9 +22,13 @@ router.post("/login", async (req, res) => {
     }
 
     const user = users[0];
+    console.log("User password hash:", user.password);
+    console.log("Input password:", password);
 
     // Check password
     const validPassword = await bcrypt.compare(password, user.password);
+    console.log("Password valid?", validPassword);
+
     if (!validPassword) {
       return res.status(401).json({
         success: false,
@@ -43,7 +49,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
