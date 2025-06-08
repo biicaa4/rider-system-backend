@@ -6,13 +6,8 @@ const axios = require("axios");
 
 router.get("/public/tomorrow", async (req, res) => {
   try {
-    const [todayResult] = await db.query("SELECT CURDATE() as today, DATE_ADD(CURDATE(), INTERVAL 1 DAY) as tomorrow");
-    const [orders] = await db.query("SELECT * FROM orders WHERE delivery_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY)");
-    res.json({
-      success: true,
-      dates: todayResult[0],
-      data: orders,
-    });
+    const [orders] = await db.query("SELECT * FROM orders WHERE DATE(delivery_date) = DATE_ADD(CURDATE(), INTERVAL 1 DAY)");
+    res.json({ success: true, data: orders });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
