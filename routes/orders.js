@@ -4,9 +4,6 @@ const db = require("../config/database");
 const authMiddleware = require("../middleware/auth");
 const axios = require("axios");
 
-// All routes here need login
-router.use(authMiddleware);
-
 router.get("/public/tomorrow", async (req, res) => {
   try {
     const [orders] = await db.query("SELECT * FROM orders WHERE delivery_date = DATE_ADD(CURDATE(), INTERVAL 1 DAY) AND status = 'confirmed'");
@@ -15,6 +12,9 @@ router.get("/public/tomorrow", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
+// All routes here need login
+router.use(authMiddleware);
 
 // GET all orders
 router.get("/", async (req, res) => {
