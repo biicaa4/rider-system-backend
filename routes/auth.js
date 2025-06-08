@@ -6,25 +6,13 @@ const db = require("../config/database");
 
 // Login route
 router.post("/login", async (req, res) => {
-  console.log("=== LOGIN ATTEMPT ===");
-  console.log("Request body:", req.body);
-
   try {
     const { username, password } = req.body;
-    console.log("Username:", username);
-    console.log("Password received:", password);
 
     // Get user from database
     const [users] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
-    console.log("Query result - users found:", users.length);
-
-    if (users.length > 0) {
-      console.log("User found:", users[0].username);
-      console.log("Stored hash:", users[0].password);
-    }
 
     if (users.length === 0) {
-      console.log("No user found with username:", username);
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
@@ -35,17 +23,13 @@ router.post("/login", async (req, res) => {
 
     // Check password
     const validPassword = await bcrypt.compare(password, user.password);
-    console.log("Password comparison result:", validPassword);
 
     if (!validPassword) {
-      console.log("Password does not match");
       return res.status(401).json({
         success: false,
         message: "Invalid credentials",
       });
     }
-
-    console.log("Login successful for user:", user.username);
 
     // Create token
     const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
@@ -66,28 +50,6 @@ router.post("/login", async (req, res) => {
       message: "Server error",
     });
   }
-});
-
-router.get("/test-hash", async (req, res) => {
-  const password = "password";
-  const storedHash = "$2b$10$4g8/w5u8RGh4M8G7CqBJAeZmVVgF9cJ5MxlN5dkHnZrR9D6e.Xj5y";
-
-  // Generate a new hash
-  const newHash = await bcrypt.hash(password, 10);
-
-  // Test the stored hash
-  const testStored = await bcrypt.compare(password, storedHash);
-
-  // Test the new hash
-  const testNew = await bcrypt.compare(password, newHash);
-
-  res.json({
-    password: password,
-    storedHash: storedHash,
-    storedHashWorks: testStored,
-    newHash: newHash,
-    newHashWorks: testNew,
-  });
 });
 
 module.exports = router;

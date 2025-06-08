@@ -13,43 +13,6 @@ router.get("/public/tomorrow", async (req, res) => {
   }
 });
 
-router.get("/public/debug", async (req, res) => {
-  try {
-    // Get all orders
-    const [allOrders] = await db.query("SELECT id, recipient_name, delivery_date, DATE(delivery_date) as date_only FROM orders");
-
-    // Get current date info
-    const [dateInfo] = await db.query("SELECT CURDATE() as today, DATE_ADD(CURDATE(), INTERVAL 1 DAY) as tomorrow");
-
-    // Get orders with date comparison
-    const [tomorrowOrders] = await db.query("SELECT * FROM orders WHERE DATE(delivery_date) = DATE_ADD(CURDATE(), INTERVAL 1 DAY)");
-
-    res.json({
-      current_dates: dateInfo[0],
-      all_orders_with_dates: allOrders,
-      tomorrow_orders: tomorrowOrders,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-router.get("/public/db-test", async (req, res) => {
-  try {
-    const [tables] = await db.query("SHOW TABLES");
-    const [orderCount] = await db.query("SELECT COUNT(*) as count FROM orders");
-    const [userCount] = await db.query("SELECT COUNT(*) as count FROM users");
-
-    res.json({
-      tables: tables,
-      orders_count: orderCount[0].count,
-      users_count: userCount[0].count,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
 // All routes here need login
 router.use(authMiddleware);
 
