@@ -34,6 +34,22 @@ router.get("/public/debug", async (req, res) => {
   }
 });
 
+router.get("/public/db-test", async (req, res) => {
+  try {
+    const [tables] = await db.query("SHOW TABLES");
+    const [orderCount] = await db.query("SELECT COUNT(*) as count FROM orders");
+    const [userCount] = await db.query("SELECT COUNT(*) as count FROM users");
+
+    res.json({
+      tables: tables,
+      orders_count: orderCount[0].count,
+      users_count: userCount[0].count,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // All routes here need login
 router.use(authMiddleware);
 
